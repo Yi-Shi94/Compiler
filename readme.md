@@ -1,4 +1,4 @@
-# Compiler Course repo for Personal study. There are notes and a java project which accepts some weird code and compiles them into llvm. Attached with plentiful test cases. Enjoy! 
+Compiler Course repo for Personal study. There are notes and a java project which accepts some weird code and compiles them into llvm. Attached with plentiful test cases. Enjoy! 
 
 ## Compiler Design Course Project 
 by Yi Shi & Yu Zhang 
