@@ -1,0 +1,25 @@
+global b;
+array b [1 .. 100] j = j+1;
+
+global c;
+array c [1 .. 100] j = j+2;
+
+global k = 567;
+global gg;
+
+defun f(a)
+  return a;
+end defun
+
+defun ff(a)
+  global k;
+  return k+a;
+end defun
+
+defun ffff(a)
+  a.1<->a.2;
+  return a;
+end defun
+
+k = f(2,3);
+k = ff(2);

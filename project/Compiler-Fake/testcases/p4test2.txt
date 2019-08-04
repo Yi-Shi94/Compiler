@@ -1,0 +1,18 @@
+global s = 10;
+
+if s>5 then print 1;
+elsif s<10 then print 2;
+else print 3;
+end if
+
+print s;
+
+defun f(t)
+  global s;
+  s = s+2;
+  local b =4;
+  print b;
+  return t+3;
+end defun
+
+print f(s);
