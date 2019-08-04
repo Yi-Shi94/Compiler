@@ -1,10 +1,8 @@
 package parser;
 
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.CommonToken;
-import org.antlr.v4.runtime.misc.Interval;
-import org.antlr.v4.runtime.misc.Pair;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ErrorNode;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,11 +19,13 @@ public class lingScannerParserCheckListener extends lingBorBaseListener {
         return isError;
     }
 
-    @Override public void visitErrorNode(ErrorNode node) {
+    @Override
+    public void visitErrorNode(ErrorNode node) {
         isError = true;
     }
 
-    @Override public void enterInt_lit(lingBorParser.Int_litContext ctx) {
+    @Override
+    public void enterInt_lit(lingBorParser.Int_litContext ctx) {
         try {
             Integer.parseInt(ctx.INT_LIT().getSymbol().getText());
         } catch (NumberFormatException exp) {
@@ -38,7 +38,8 @@ public class lingScannerParserCheckListener extends lingBorBaseListener {
         }
     }
 
-    @Override public void enterId(lingBorParser.IdContext ctx) {
+    @Override
+    public void enterId(lingBorParser.IdContext ctx) {
         String id = ctx.ID().getSymbol().getText();
         String patternString = "^[a-zA-Z_]{1,80}$";
         Pattern pattern = Pattern.compile(patternString);
@@ -56,7 +57,8 @@ public class lingScannerParserCheckListener extends lingBorBaseListener {
 
     }
 
-    @Override public void exitId(lingBorParser.IdContext ctx) {
+    @Override
+    public void exitId(lingBorParser.IdContext ctx) {
     }
 
 

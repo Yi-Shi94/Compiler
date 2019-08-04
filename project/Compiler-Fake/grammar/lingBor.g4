@@ -42,6 +42,7 @@ OP_GREATEREQUAL: '>=';
 
 INT_LIT: [0-9]+;
 int_lit: INT_LIT;
+
 ID: [a-zA-Z_]+;
 id : ID;
 
@@ -65,16 +66,20 @@ while_loop: KW_WHILE bool_expr  KW_DO statement* KW_END KW_WHILE;
 
 statement : lhs ASSIGN expr SEMI
           | lhs EXCHANGE lhs SEMI
-	  | KW_IF bool_expr KW_THEN statement*
-	    (KW_ELSIF bool_expr KW_THEN statement*)*
-	    (KW_ELSE statement*)? KW_END KW_IF
-	  | for_loop
-	  | while_loop
-	  | RETURN expr SEMI
-	  | PRINT expr SEMI
-      ;
+	      | cond
+	      | for_loop
+	      | while_loop
+	      | RETURN expr SEMI
+	      | PRINT expr SEMI
+          ;
 
 array_id: id;
+
+cond: ifs elsifs? elses? KW_END KW_IF;
+
+ifs:  KW_IF bool_expr KW_THEN statement*;
+elsifs: (KW_ELSIF bool_expr KW_THEN statement*) elsifs?;
+elses: (KW_ELSE statement*);
 
 range : expr OP_DOTDOT expr ;
 

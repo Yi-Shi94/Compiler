@@ -1,24 +1,20 @@
 #include <stdio.h>
 
-int a = 15;
-int b = 12;
+
+int aa = 2;
+
+int display(int n[])
+{
+int b[5];
+    return n[0]+n[1];
+}
+
+
 int main(){
-    int s = 3;
-    int k = 2;
-
-    int t = s;
-    s = k;
-    k = t;
-
-    k = addOne(s);
-    printf("%d\n", k);
-
+int a[5];
+a[1] = aa;
+//a[1] = 3;
+//a[3] = a[0]+a[1];
+printf("%d ",display(a));
 }
 
-
-int addOne(int a){
-    printf("%d\n", a);
-    b = 1;
-    printf("%d\n", a);
-    return a+b;
-}

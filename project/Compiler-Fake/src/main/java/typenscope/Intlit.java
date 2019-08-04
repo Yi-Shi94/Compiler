@@ -20,12 +20,12 @@ public class Intlit extends Symbol {
         return this.val;
     }
 
-    public Intlit(String name,int line){
+    public Intlit(String name, int line){
         this.name = name;
         this.line = line;
     }
 
-    public void setNameAndLine(String name,int line) {
+    public void setNameAndLine(String name, int line) {
         this.name = name;
         this.line = line;
     }

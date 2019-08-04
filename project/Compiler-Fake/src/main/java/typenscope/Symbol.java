@@ -16,7 +16,7 @@ public class Symbol {
     public Symbol() {
     }
 
-    public Symbol(String name,int line){
+    public Symbol(String name, int line){
         this.name = name;
         this.line = line;
     }

@@ -1,18 +1,60 @@
-global s = 10;
+*** nested if,else,func
 
-if s>5 then print 1;
-elsif s<10 then print 2;
-else print 3;
+global s = 75;
+global ss = 110;
+global a = 12;
+
+*** partial if(no else)
+if a>10 then
+    print a;
+else
+    print 10;
 end if
 
-print s;
+if a>10 then
+    print a;
+end if
+
+*** nested if.. elsif.. else..
+if s>5 then
+    if ss>100 then
+        print 100;
+    elsif ss<50 then
+        print 50;
+    end if
+elsif s<4 then
+    print 4;
+else
+    print 3;
+end if
+
+*** function with if else
+*** with local value
+
+
 
 defun f(t)
   global s;
-  s = s+2;
-  local b =4;
-  print b;
-  return t+3;
+  local b = 22;
+
+  if b>5 then print 42;
+  else print 24;
+  end if
+
+  return t+b;
 end defun
 
-print f(s);
+
+
+defun ff(t)
+  local b = 22;
+  t = 44;
+  return t+b;
+end defun
+
+
+
+
+
+print f(ss);
+print ff(ss);

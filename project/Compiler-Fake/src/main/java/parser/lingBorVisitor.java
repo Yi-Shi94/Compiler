@@ -77,6 +77,30 @@ public interface lingBorVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitArray_id(lingBorParser.Array_idContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link lingBorParser#cond}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCond(lingBorParser.CondContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link lingBorParser#ifs}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIfs(lingBorParser.IfsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link lingBorParser#elsifs}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitElsifs(lingBorParser.ElsifsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link lingBorParser#elses}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitElses(lingBorParser.ElsesContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link lingBorParser#range}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

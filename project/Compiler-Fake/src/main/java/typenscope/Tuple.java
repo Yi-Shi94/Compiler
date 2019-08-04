@@ -1,6 +1,6 @@
 package typenscope;
 
-public class Tuple extends Symbol{
+public class Tuple extends Symbol {
 
     private int length;
     private boolean isLocal;
@@ -12,13 +12,13 @@ public class Tuple extends Symbol{
         this.length = length;
     }
 
-    public Tuple(String name,int line,int length){
+    public Tuple(String name, int line, int length){
        this.name = name;
        this.length = length;
        this.line = line;
     }
 
-    public void setNameAndLine(String name,int line) {
+    public void setNameAndLine(String name, int line) {
         this.name = name;
         this.line = line;
     }

@@ -1,0 +1,30 @@
+*** tuple
+
+global tp = 2,3;
+
+print tp.0;
+print tp.1;
+
+tp = 4,5;
+
+print tp.0;
+print tp.1;
+
+global a = 0;
+global b = 0;
+
+a,b = tp;
+
+print a;
+print b;
+
+global bb = 1,2;
+global xx = 2,3;
+
+defun sss(x)
+    local cc = 5,6;
+    global xx;
+    return xx.0+x.1+cc.0;
+end defun
+
+print sss(bb);

@@ -6,11 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="sy" />
+        <module name="Compiler-Fake" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="sy" target="1.8" />
+      <module name="Compiler-Fake" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

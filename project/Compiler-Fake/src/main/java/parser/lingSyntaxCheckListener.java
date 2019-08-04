@@ -1,27 +1,20 @@
 package parser;
 
-import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.misc.Interval;
-import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import typenscope.*;
 
-import java.util.*;
-import java.util.regex.Matcher;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.regex.Pattern;
 
-public class lingSyntaxCheckListener extends lingBorBaseListener{
+public class lingSyntaxCheckListener extends lingBorBaseListener {
 
     private HashMap<String, Symbol> globalMap = new HashMap<>();
     private HashMap<String, Symbol> funcVarMap = new HashMap<>();
     private HashMap<String, Func> funcMap = new HashMap<>();
-
+    private HashSet<String> globalVarInFunc = new HashSet<>();
     private String curFuncName = null;
+    private String curFuncVar = null;
     private Func curFunc = null;
 
     private boolean isFuncError = false;
@@ -47,16 +40,16 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
         System.out.println("<----------------Table__End--------------------->\n");
     }
 
-    public HashMap<String,Func> getFuncMap(){
+    public HashMap<String, Func> getFuncMap(){
         return this.funcMap;
     }
 
-    public HashMap<String,Symbol> getGlobalMap(){
+    public HashMap<String, Symbol> getGlobalMap(){
         return this.globalMap;
     }
 
-    public void printSymbolMap(){
-        if (statusFunc == 0){
+    public void printSymbolMap() {
+        if (statusFunc == 0) {
             printMap(globalMap);
         } else {
             printMap(funcVarMap);
@@ -135,7 +128,7 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
         }
     }
 
-    private void putSymbolByName(String idName,Symbol s){
+    private void putSymbolByName(String idName, Symbol s){
         if (statusFunc == 0) {
             globalMap.put(idName,s);
         } else {
@@ -169,7 +162,7 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
         } else if (type=="ARRAY"){
             return new Arr(name,line);
         } else if (type.split(",", 2)[0].equals("TUPLE")){
-            return new Tuple(name,line,Integer.parseInt(type.split(",",2)[1]));
+            return new Tuple(name,line, Integer.parseInt(type.split(",",2)[1]));
         } else {
             return new Symbol(name,line);
         }
@@ -182,7 +175,6 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
         else if (ctx.OP_MULT()!=null){return ctx.OP_MULT().getSymbol();}
         else {return null;} //I should not have done that.
     }
-
 
     public int checkByContextLhsItem(lingBorParser.Lhs_itemContext ctx){
         if(ctx.tuple_ele()!=null){
@@ -285,7 +277,7 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
         if (ctx.id() != null) {
             String funcName = ctx.id().ID().getSymbol().getText();
             int line = ctx.id().ID().getSymbol().getLine();
-            if (!isDefinedInFuncMap(funcName)) {
+            if (!isDefinedInFuncMap(funcName)&&funcName!=curFuncName) {
                 isFuncError = true;
                 isSyntaxError += 1;
                 System.out.println(String.format("ERROR ! function %s on line %d is not defined", ctx.id().ID().getSymbol().getText(),line));
@@ -386,7 +378,9 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
 
     private void checkByContextArrayEle(lingBorParser.Array_eleContext ctx) {
         if(ctx.id()!=null) {
-            if (getTypeByName(ctx.id().ID().getSymbol().getText()) != "ARRAY") {
+            String idName = ctx.id().ID().getSymbol().getText();
+            String type = getTypeByName(idName);
+            if (type!= "ARRAY" && !idName.equals(curFuncVar)) {
                 isSyntaxError += 1;
                 System.out.println(String.format("Error ! array var%s is not defined", ctx.id().ID().getSymbol().getText()));
             }
@@ -427,16 +421,27 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
                 }
             }
         }
-        if(ctx.statement()!=null){
-            for(lingBorParser.StatementContext st0:ctx.statement()){
+        if(ctx.cond()!=null){
+            for(lingBorParser.StatementContext st0:ctx.cond().ifs().statement()){
                 recursiveDefunStatement(st0);
+            }
+            if(ctx.cond().elsifs()!=null) {
+                for (lingBorParser.StatementContext st0 : ctx.cond().elsifs().statement()) {
+                    recursiveDefunStatement(st0);
+                }
+            }
+            if(ctx.cond().elses()!=null){
+                for (lingBorParser.StatementContext st0 : ctx.cond().elses().statement()) {
+                    recursiveDefunStatement(st0);
+                }
             }
         }
     }
 
 
 
-    @Override public void enterDef(lingBorParser.DefContext ctx) {
+    @Override
+    public void enterDef(lingBorParser.DefContext ctx) {
         isFuncError= false;
         System.out.println("\n<---Entering a function---->");
         curFuncName = ctx.id().ID().getSymbol().getText();
@@ -455,9 +460,11 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
                 return;
             }
 
+            curFuncVar = ctx.expr().id().ID().getSymbol().getText();
             String inputVarName = ctx.expr().id().ID().getSymbol().getText();
             curFunc = new Func(curFuncName, line, inputVarName, ctx);
-
+            curFunc.storeFuncVarMap(this.funcVarMap);
+            funcMap.put(curFuncName,curFunc);
             if (ctx.body().statement() != null) {
                 for (lingBorParser.StatementContext st0 : ctx.body().statement()) {
                     recursiveDefunStatement(st0);
@@ -471,19 +478,26 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
         }
     }
 
-    @Override public void exitDef(lingBorParser.DefContext ctx) {
+    @Override
+    public void exitDef(lingBorParser.DefContext ctx) {
         System.out.println("<---Exiting a function---->\n");
-        curFunc.storeFuncVarMap(funcVarMap);
-        if(!isFuncError) funcMap.put(curFuncName,curFunc);
+        if(curFunc!= null && funcVarMap!=null) {
+            curFunc.storeFuncVarMap(funcVarMap);
+            curFunc.storeGlobalVar(globalVarInFunc);
 
+            if (!isFuncError) funcMap.put(curFuncName, curFunc);
+            else funcMap.remove(curFuncName);
+            globalVarInFunc.clear();
+            funcVarMap.clear();
+        }
         curFuncName = null;
         curFunc = null;
 
-        funcVarMap.clear();
         this.statusFunc -= 1;
     }
 
-    @Override public void enterDecl(lingBorParser.DeclContext ctx) {
+    @Override
+    public void enterDecl(lingBorParser.DeclContext ctx) {
         String idName = ctx.id(0).ID().getSymbol().getText();
         int line = ctx.id(0).ID().getSymbol().getLine();
 
@@ -493,6 +507,7 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
                 printSymbolMap();
                 System.out.println(String.format("SUCCESS! The global array id:%s on line %d has been defined",idName,line));
             } else if(!isInSymbolMap(idName)){
+
                 isFuncError = true;
                 isSyntaxError += 1;
                 System.out.println(String.format("ERROR ! The array:%s line %d has not been defined its scope",idName,line));
@@ -542,6 +557,7 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
                 } else {
                     if(globalMap.containsKey(idName) && globalMap.get(idName).isDefined()){
                         putSymbolByName(idName,globalMap.get(idName));
+                        globalVarInFunc.add(idName);
                         printSymbolMap();
                         System.out.println(String.format("SUCCESS ! global var:%s on line %d is declared in function",idName, line));
                     } else {
@@ -576,7 +592,23 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
         }
     }
 
-    @Override public void enterFor_loop(lingBorParser.For_loopContext ctx) {
+    @Override
+    public void enterFor_loop(lingBorParser.For_loopContext ctx) {
+
+
+        if(ctx.expr().id()!= null) {
+            String idName = ctx.expr().id().ID().getSymbol().getText();
+            int line = ctx.expr().id().ID().getSymbol().getLine();
+            Symbol idSymbol = new Intlit(idName,line);
+            putSymbolByName(idName,idSymbol);
+            printSymbolMap();
+
+            this.statusForLoop += 1;
+        } else {
+            isFuncError = true;
+            isSyntaxError += 1;
+            System.out.println("ERROR ! illegal expr found as foreach index var, id only!");
+        }
 
         if(ctx.array_id()!=null){
             String idName = ctx.array_id().id().ID().getSymbol().getText();
@@ -599,21 +631,11 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
             }
         }
 
-        if(ctx.expr().id()!= null) {
-            String idName = ctx.expr().id().ID().getSymbol().getText();
-            int line = ctx.expr().id().ID().getSymbol().getLine();
-            Symbol idSymbol = new Intlit(idName,line);
-            putSymbolByName(idName,idSymbol);
-            this.statusForLoop += 1;
-        } else {
-            isFuncError = true;
-            isSyntaxError += 1;
-            System.out.println("ERROR ! illegal expr found as foreach index var, id only!");
-        }
 
     }
 
-    @Override public void exitFor_loop(lingBorParser.For_loopContext ctx) {
+    @Override
+    public void exitFor_loop(lingBorParser.For_loopContext ctx) {
         if(ctx.expr().id()!= null) {
             String idName = ctx.expr().id().ID().getSymbol().getText();
             int line = ctx.expr().id().ID().getSymbol().getLine();
@@ -622,15 +644,18 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
         }
     }
 
-    @Override public void enterWhile_loop(lingBorParser.While_loopContext ctx) {
+    @Override
+    public void enterWhile_loop(lingBorParser.While_loopContext ctx) {
         this.statusForLoop += 1;
     }
 
-    @Override public void exitWhile_loop(lingBorParser.While_loopContext ctx) {
+    @Override
+    public void exitWhile_loop(lingBorParser.While_loopContext ctx) {
         this.statusForLoop -= 1;
     }
 
-    @Override public void enterStatement(lingBorParser.StatementContext ctx) {
+    @Override
+    public void enterStatement(lingBorParser.StatementContext ctx) {
 
         if (ctx.PRINT() != null) {
             if (ctx.expr() != null) {
@@ -673,7 +698,7 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
                 }
                 return;
             }
-            if (leftType != rightType) {
+            if (!leftType.equals(rightType)) {
                 isFuncError = true;
                 isSyntaxError += 1;
                 System.out.println(String.format("ERROR ! ASSIGN statement on line %d invalid! %s cannot be assigned with a %s", line,leftType, rightType));
@@ -695,16 +720,33 @@ public class lingSyntaxCheckListener extends lingBorBaseListener{
                 System.out.println(String.format("ERROR ! var:%s on line %d cannot be assigned with %s", leftType, rightType));
             }
 
-        } else if (ctx.bool_expr()!=null){
-
         }
     }
 
-    @Override public void exitStatement(lingBorParser.StatementContext ctx) { }
+    @Override
+    public void exitStatement(lingBorParser.StatementContext ctx) { }
 
-    @Override public void exitBool_expr(lingBorParser.Bool_exprContext ctx) {
+    private boolean isCurFuncVarOnBool(lingBorParser.ExprContext ctx1, lingBorParser.ExprContext ctx2){
+        if(inferenceByContext(ctx2)=="INT_LIT"&&inferenceByContext(ctx1)=="UNDEFINED"
+                &&ctx1.id()!=null&&ctx1.id().ID().getSymbol().getText().equals(curFuncVar)){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public void exitBool_expr(lingBorParser.Bool_exprContext ctx) {
         if (ctx.expr()!=null){
-            if (inferenceByContext(ctx.expr(0))=="INT_LIT" && inferenceByContext(ctx.expr(1))=="INT_LIT") {
+            if(isCurFuncVarOnBool(ctx.expr(0),ctx.expr(1))) {
+                String idName = ctx.expr(0).id().ID().getSymbol().getText();
+                putSymbolByName(idName,new Intlit(idName,
+                        ctx.expr(0).id().ID().getSymbol().getLine()));
+            } else if(isCurFuncVarOnBool(ctx.expr(1),ctx.expr(0))){
+                String idName = ctx.expr(1).id().ID().getSymbol().getText();
+                putSymbolByName(idName,new Intlit(idName,
+                        ctx.expr(1).id().ID().getSymbol().getLine()));
+            } else if (inferenceByContext(ctx.expr(0))=="INT_LIT" && inferenceByContext(ctx.expr(1))=="INT_LIT") {
             } else {
                 isFuncError = true;
                 isSyntaxError += 1;

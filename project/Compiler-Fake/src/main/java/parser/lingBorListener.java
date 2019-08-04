@@ -118,6 +118,46 @@ public interface lingBorListener extends ParseTreeListener {
 	 */
 	void exitArray_id(lingBorParser.Array_idContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link lingBorParser#cond}.
+	 * @param ctx the parse tree
+	 */
+	void enterCond(lingBorParser.CondContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link lingBorParser#cond}.
+	 * @param ctx the parse tree
+	 */
+	void exitCond(lingBorParser.CondContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link lingBorParser#ifs}.
+	 * @param ctx the parse tree
+	 */
+	void enterIfs(lingBorParser.IfsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link lingBorParser#ifs}.
+	 * @param ctx the parse tree
+	 */
+	void exitIfs(lingBorParser.IfsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link lingBorParser#elsifs}.
+	 * @param ctx the parse tree
+	 */
+	void enterElsifs(lingBorParser.ElsifsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link lingBorParser#elsifs}.
+	 * @param ctx the parse tree
+	 */
+	void exitElsifs(lingBorParser.ElsifsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link lingBorParser#elses}.
+	 * @param ctx the parse tree
+	 */
+	void enterElses(lingBorParser.ElsesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link lingBorParser#elses}.
+	 * @param ctx the parse tree
+	 */
+	void exitElses(lingBorParser.ElsesContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link lingBorParser#range}.
 	 * @param ctx the parse tree
 	 */

@@ -1,7 +1,5 @@
 package typenscope;
 
-import java.util.ArrayList;
-
 public class Arr extends Symbol {
 
     private int startPos;
