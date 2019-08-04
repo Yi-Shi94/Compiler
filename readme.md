@@ -1,4 +1,7 @@
-# Compiler Design Course Project
+# Compiler Course repo for Personal study. There are notes and a java project which accepts some weird code and compiles them into llvm. Attached with plentiful test cases. Enjoy! 
+
+## Compiler Design Course Project 
+by Yi Shi & Yu Zhang 
 
 #### Build Tool - Maven
 - The project uses maven to manage its dependency. The maven config file can be found [here](./pom.xml). 
